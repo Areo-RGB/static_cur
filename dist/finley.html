@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Finley's Performance Data</title>
+    <!-- CSS files -->
+    <link href="./css/tabler.min.css" rel="stylesheet" />
+    <link href="./css/tabler-flags.min.css" rel="stylesheet" />
+    <link href="./css/tabler-vendors.min.css" rel="stylesheet" />
+    <style>
+      @import url("https://rsms.me/inter/inter.css");
+    </style>
+    <!-- Google API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="./js/sheets-api.js"></script>
+    <script>
+      // Function to be called when gapi is loaded
+      function handleClientLoad() {
+        // Initialize the Google API
+        initGapi().then(() => {
+          console.log('Google API initialized, loading athlete data...');
+          return loadAthleteData('Finley');
+        }).catch(error => {
+          console.error('Error initializing Google API or loading athlete data:', error);
+        });
+      }
+
+      // Wait for DOM content to be loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // If gapi is already loaded, initialize it
+        if (window.gapi) {
+          handleClientLoad();
+        } else {
+          // Otherwise wait for the script to load
+          document.querySelector('script[src*="apis.google.com"]').onload = handleClientLoad;
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="page">
+      <!-- BEGIN NAVBAR  -->
+      <header class="navbar navbar-expand-md d-print-none">
+        <div class="container-xl">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+            <a href="index.html">
+              <h1 class="navbar-brand-image">Athlete Performance Hub</h1>
+            </a>
+          </div>
+          <div class="navbar-nav flex-row order-md-last">
+            <div class="d-none d-md-flex">
+              <div class="nav-item">
+                <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode">
+                  <!-- Dark mode icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                  </svg>
+                </a>
+                <a href="?theme=light" class="nav-link px-0 hide-theme-light" title="Enable light mode">
+                  <!-- Light mode icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                  </svg>
+                </a>
+              </div>
+              <div class="nav-item dropdown">
+                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
+                  <span class="avatar avatar-sm" style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/3/39/Hertha_03_Zehlendorf_Logo.svg); background-size: contain; background-color: transparent; background-position: center;"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <a href="#" class="dropdown-item">Profile</a>
+                  <a href="#" class="dropdown-item">Settings</a>
+                  <a href="#" class="dropdown-item">Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- END NAVBAR -->
+      <!-- BEGIN NAVIGATION -->
+      <div class="navbar-expand-md">
+        <div class="collapse navbar-collapse" id="navbar-menu">
+          <div class="navbar">
+            <div class="container-xl">
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="index.html">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <!-- Home icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                        <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                      </svg>
+                    </span>
+                    <span class="nav-link-title">Dashboard</span>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <!-- Athletes icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697" />
+                        <path d="M18 14v4h4" />
+                        <path d="M18 11v-4a2 2 0 0 0 -2 -2h-2" />
+                        <path d="M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                        <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                      </svg>
+                    </span>
+                    <span class="nav-link-title">Athletes</span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-menu-columns">
+                      <div class="dropdown-menu-column">
+                        <a class="dropdown-item" href="finley.html">Finley</a>
+                        <a class="dropdown-item" href="bent.html">Bent</a>
+                        <a class="dropdown-item" href="ricky.html">Ricky</a>
+                        <a class="dropdown-item" href="#">All Athletes</a>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <!-- Analytics icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M4 19l16 0" />
+                        <path d="M4 15l4 -6l4 2l4 -5l4 4" />
+                      </svg>
+                    </span>
+                    <span class="nav-link-title">Analytics</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END NAVIGATION -->
+      <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="page-header d-print-none">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <h2 class="page-title">Finley's Performance Profile</h2>
+                <div class="text-secondary mt-1">U11 Athlete Performance Analysis</div>
+              </div>
+              <!-- Page title actions -->
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="#" class="btn">New Test</a>
+                  <a href="#" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M12 5l0 14" />
+                      <path d="M5 12l14 0" />
+                    </svg>
+                    Add Test Result
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Page body -->
+        <div class="page-body">
+          <div class="container-xl">
+            <div class="row row-deck row-cards">
+              <!-- Performance summary cards -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Overall Performance</div>
+                    </div>
+                    <div class="h1 mb-3">85%</div>
+                    <div class="d-flex mb-2">
+                      <div>Compared to U11 Norms</div>
+                      <div class="ms-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          +5%
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon ms-1" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 17l6 -6l4 4l8 -8" />
+                            <path d="M14 7l7 0l0 7" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Tests Completed</div>
+                    </div>
+                    <div class="h1 mb-3" id="test-count">-</div>
+                    <div class="d-flex mb-2">
+                      <div>Last 30 days</div>
+                      <div class="ms-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          3 New
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Best Category</div>
+                    </div>
+                    <div class="h1 mb-3">Speed</div>
+                    <div class="d-flex mb-2">
+                      <div>90th percentile</div>
+                      <div class="ms-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          +8%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Next Test</div>
+                    </div>
+                    <div class="h1 mb-3">5d</div>
+                    <div class="d-flex mb-2">
+                      <div>Agility Test</div>
+                      <div class="ms-auto">
+                        <span class="text-muted">Scheduled</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Performance comparison chart -->
+              <div class="col-lg-8">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Performance Comparison</h3>
+                  </div>
+                  <div class="card-body">
+                    <div id="chart-performance" class="chart-lg"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Best Results -->
+              <div class="col-lg-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Best Results</h3>
+                  </div>
+                  <div id="best-results">
+                    <!-- Best results will be loaded here -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Normative data chart -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">U11 Normative Data Comparison</h3>
+                    <div class="card-actions">
+                      <div class="row g-2">
+                        <div class="col">
+                          <select id="test-type-selector" class="form-select">
+                            <option value="dribbling" selected>Dribbling</option>
+                            <option value="schnelligkeit">Schnelligkeit (20 m)</option>
+                            <option value="antritt">Antritt (10 m)</option>
+                            <option value="gewandtheit">Gewandtheit</option>
+                            <option value="ballkontrolle">Ballkontrolle</option>
+                            <option value="balljonglieren">Balljonglieren</option>
+                            <option value="gesamtleistung">Gesamtleistung</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="normative-data-chart" class="chart-lg"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Page footer -->
+        <footer class="footer footer-transparent d-print-none">
+          <div class="container-xl">
+            <div class="row text-center align-items-center flex-row-reverse">
+              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                <ul class="list-inline list-inline-dots mb-0">
+                  <li class="list-inline-item">
+                    Copyright &copy; 2023
+                    <a href="." class="link-secondary">Athlete Performance Hub</a>.
+                    All rights reserved.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    
+    <!-- Core -->
+    <script src="./js/tabler.min.js" defer></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- Charts initialization -->
+    <script>
+      // Performance comparison chart
+      window.ApexCharts && (new ApexCharts(document.getElementById('chart-performance'), {
+        chart: {
+          type: "bar",
+          fontFamily: 'inherit',
+          height: 300,
+          toolbar: {
+            show: false,
+          },
+          animations: {
+            enabled: false
+          },
+        },
+        plotOptions: {
+          bar: {
+            columnWidth: '50%',
+          }
+        },
+        series: [{
+          name: "Finley's Performance",
+          data: [90, 75, 50, 80, 50, 85]
+        }],
+        colors: ["#206bc4"],
+        xaxis: {
+          categories: ["Speed", "Agility", "Dribbling", "Ball Control", "Juggling", "Overall"]
+        },
+        yaxis: {
+          title: {
+            text: "Percentile Rank"
+          },
+          min: 0,
+          max: 100
+        },
+        grid: {
+          strokeDashArray: 4,
+        },
+        tooltip: {
+          y: {
+            formatter: function(val) {
+              return val + "th percentile"
+            }
+          }
+        }
+      })).render();
+
+      // Normative data chart initialization
+      const normativeData = {
+        schnelligkeit: {
+          name: "Schnelligkeit (20 m)",
+          unit: "s",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [4.14, 4.01, 3.93, 3.87, 3.82, 3.78, 3.74, 3.69, 3.64, 3.57, 3.47],
+          playerValue: 3.82
+        },
+        antritt: {
+          name: "Antritt (10 m)",
+          unit: "s",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [2.39, 2.33, 2.28, 2.24, 2.21, 2.18, 2.15, 2.13, 2.09, 2.05, 1.99],
+          playerValue: 2.21
+        },
+        gewandtheit: {
+          name: "Gewandtheit",
+          unit: "s",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [9.66, 9.33, 9.07, 8.90, 8.77, 8.66, 8.54, 8.42, 8.28, 8.11, 7.91],
+          playerValue: 8.66
+        },
+        dribbling: {
+          name: "Dribbling",
+          unit: "s",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [14.37, 13.42, 12.84, 12.46, 12.15, 11.90, 11.68, 11.44, 11.16, 10.84, 10.45],
+          playerValue: 11.90
+        },
+        ballkontrolle: {
+          name: "Ballkontrolle",
+          unit: "s",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [15.29, 13.81, 12.86, 12.28, 11.78, 11.36, 10.99, 10.59, 10.18, 9.66, 9.00],
+          playerValue: 11.36
+        },
+        balljonglieren: {
+          name: "Balljonglieren",
+          unit: "P",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [0.00, 0.00, 0.00, 0.00, 1.00, 1.00, 1.00, 1.00, 2.00, 5.00, 6.00],
+          playerValue: 1.00
+        },
+        gesamtleistung: {
+          name: "Gesamtleistung",
+          unit: "P",
+          percentiles: [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 97],
+          values: [95.53, 96.78, 97.65, 98.25, 98.80, 99.30, 99.81, 100.30, 100.90, 101.68, 102.84],
+          playerValue: 98.80
+        }
+      };
+
+      let normativeChart;
+      let currentTestType = 'dribbling';
+
+      function calculatePercentile(value, values, percentiles) {
+        // Handle edge cases
+        if (value <= values[0]) return percentiles[0];
+        if (value >= values[values.length - 1]) return percentiles[percentiles.length - 1];
+        
+        // Find the position where player's value fits in the sorted values
+        for (let i = 0; i < values.length - 1; i++) {
+          if (value >= values[i] && value <= values[i + 1]) {
+            // Linear interpolation to get precise percentile
+            const valueDiff = values[i + 1] - values[i];
+            const percentileDiff = percentiles[i + 1] - percentiles[i];
+            const ratio = (value - values[i]) / valueDiff;
+            return percentiles[i] + (ratio * percentileDiff);
+          }
+        }
+        return percentiles[0]; // Fallback
+      }
+
+      function renderChart() {
+        const testData = normativeData[currentTestType];
+        
+        // Calculate player's percentile
+        const playerPercentile = calculatePercentile(
+          testData.playerValue,
+          testData.values,
+          testData.percentiles
+        );
+        
+        const colors = testData.percentiles.map(p => {
+          if (p <= 30) return '#6c757d';
+          if (p <= 70) return '#ffc107';
+          return '#4caf50';
+        });
+        
+        const chartOptions = {
+          chart: {
+            type: 'bar',
+            fontFamily: 'inherit',
+            height: 350,
+            toolbar: {
+              show: false,
+            },
+            animations: {
+              enabled: true
+            },
+          },
+          plotOptions: {
+            bar: {
+              distributed: true,
+              columnWidth: '70%',
+            }
+          },
+          series: [{
+            name: testData.name,
+            data: testData.values
+          }],
+          dataLabels: {
+            enabled: true,
+            formatter: function(val) {
+              return val + ' ' + testData.unit;
+            },
+            style: {
+              colors: ['#000000'],  // Back to black text for all labels
+              fontSize: '12px',
+              fontWeight: 'bold'
+            }
+          },
+          colors: colors,
+          xaxis: {
+            categories: testData.percentiles.map(p => p + '%'),
+            title: {
+              text: 'Percentile'
+            }
+          },
+          yaxis: {
+            title: {
+              text: testData.name + ' (' + testData.unit + ')'
+            },
+            labels: {
+              formatter: function(val) {
+                return val.toFixed(2) + ' ' + testData.unit;
+              }
+            }
+          },
+          grid: {
+            strokeDashArray: 4,
+          },
+          tooltip: {
+            y: {
+              formatter: function(val) {
+                return val.toFixed(2) + ' ' + testData.unit;
+              }
+            }
+          },
+          legend: {
+            show: false
+          },
+          annotations: {
+            yaxis: [{
+              y: testData.playerValue,
+              borderColor: playerPercentile <= 30 ? '#6c757d' : playerPercentile <= 70 ? '#ffc107' : '#4caf50',
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                show: true,
+                text: testData.playerValue.toFixed(2) + ' ' + testData.unit,
+                style: {
+                  color: '#000000',
+                  background: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  padding: {
+                    left: 10,
+                    right: 10,
+                    top: 5,
+                    bottom: 5
+                  },
+                  borderRadius: 5
+                },
+                offsetX: 5,
+                position: 'left'
+              }
+            }]
+          }
+        };
+
+        if (normativeChart) {
+          normativeChart.updateOptions(chartOptions);
+          normativeChart.updateSeries([{
+            name: testData.name,
+            data: testData.values
+          }]);
+        } else {
+          normativeChart = new ApexCharts(document.getElementById('normative-data-chart'), chartOptions);
+          normativeChart.render();
+        }
+      }
+
+      renderChart();
+
+      document.getElementById('test-type-selector').addEventListener('change', function() {
+        currentTestType = this.value;
+        renderChart();
+      });
+    </script>
+  </body>
+</html> 

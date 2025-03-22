@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Test Results Overview - Athlete Performance Dashboard</title>
+    
+    <!-- Stylesheets -->
+    <link href="./css/tabler.min.css" rel="stylesheet" />
+    <link href="./css/tabler-flags.min.css" rel="stylesheet" />
+    <link href="./css/tabler-vendors.min.css" rel="stylesheet" />
+    
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="./js/sheets-api.js"></script>
+    
+    <script>
+        const SPREADSHEET_ID = '136NX0510MEeGeAxMYErxMGgpo5VZ2ph68eSKMfsUw-E';
+        const DEFAULT_RANGE = 'A1:E1010'; // Adjust range to cover all data
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the API client
+            gapi.load('client', async () => {
+                await initializeGapiClient();
+                gisInit();
+                loadDefaultData();
+            });
+
+            // Function to load the default data
+            async function loadDefaultData() {
+                const data = await loadSheetData(SPREADSHEET_ID, DEFAULT_RANGE);
+                if (data) {
+                    displaySheetData(data);
+                    initializeFilters(data);
+                }
+            }
+
+            // Initialize filter dropdowns
+            function initializeFilters(data) {
+                if (!data || data.length <= 1) return;
+
+                const categories = new Set();
+                const exercises = new Set();
+                
+                // Start from 1 to skip header row
+                for (let i = 1; i < data.length; i++) {
+                    if (data[i][0]) categories.add(data[i][0]); // Category column
+                    if (data[i][1]) exercises.add(data[i][1]); // Exercise column
+                }
+
+                // Populate category filter
+                const categoryFilter = document.getElementById('category-filter');
+                categoryFilter.innerHTML = '<option value="">All Categories</option>' +
+                    Array.from(categories).sort().map(cat => 
+                        `<option value="${cat}">${cat}</option>`).join('');
+
+                // Populate exercise filter
+                const exerciseFilter = document.getElementById('exercise-filter');
+                exerciseFilter.innerHTML = '<option value="">All Exercises</option>' +
+                    Array.from(exercises).sort().map(ex => 
+                        `<option value="${ex}">${ex}</option>`).join('');
+
+                // Add event listeners to filters
+                categoryFilter.addEventListener('change', filterData);
+                exerciseFilter.addEventListener('change', filterData);
+            }
+
+            // Filter the displayed data
+            function filterData() {
+                const categoryValue = document.getElementById('category-filter').value;
+                const exerciseValue = document.getElementById('exercise-filter').value;
+                
+                loadSheetData(SPREADSHEET_ID, DEFAULT_RANGE).then(data => {
+                    if (!data) return;
+
+                    const filteredData = [data[0]]; // Keep header row
+                    
+                    for (let i = 1; i < data.length; i++) {
+                        const row = data[i];
+                        const matchesCategory = !categoryValue || row[0] === categoryValue;
+                        const matchesExercise = !exerciseValue || row[1] === exerciseValue;
+                        
+                        if (matchesCategory && matchesExercise) {
+                            filteredData.push(row);
+                        }
+                    }
+                    
+                    displaySheetData(filteredData);
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="page">
+        <div class="page-wrapper">
+            <div class="container-xl">
+                <!-- Page title -->
+                <div class="page-header d-print-none">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="page-title">Test Results Overview</h2>
+                            <div class="text-muted mt-1">View and analyze athlete test results</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filters Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Filters</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <select id="category-filter" class="form-select">
+                                    <option value="">Loading categories...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select id="exercise-filter" class="form-select">
+                                    <option value="">Loading exercises...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Table Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Test Results Data</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="sheet-data" class="table table-vcenter card-table">
+                                <thead>
+                                    <tr>
+                                        <th>Loading data...</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Core Scripts -->
+    <script src="./js/tabler.min.js" defer></script>
+</body>
+</html> 
